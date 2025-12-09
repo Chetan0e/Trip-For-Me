@@ -1,0 +1,5 @@
+{
+  "name": "Trip For Me",
+  "description": "An autonomous multimodal travel planning engine powered by Gemini 3 Pro. Plan optimized trips, budgets, and get booking links with AI reasoning.",
+  "requestFramePermissions": []
+}
