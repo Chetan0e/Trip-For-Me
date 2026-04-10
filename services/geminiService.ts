@@ -101,11 +101,12 @@ const tripPlanSchema: Schema = {
 };
 
 export const generateTripPlan = async (prefs: UserPreferences): Promise<TripPlan> => {
-  if (!process.env.API_KEY) {
-    throw new Error("API Key is missing.");
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error("Gemini API Key is missing. Please check your .env file.");
   }
 
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI(apiKey);
 
   // Optimized Logic:
   // 1. If user wants specific search (Flight/Hotel), fill ONLY that array.
@@ -140,7 +141,7 @@ export const generateTripPlan = async (prefs: UserPreferences): Promise<TripPlan
     Budget: ${prefs.budget}
     
     RULES:
-    1. **Speed**: Keep descriptions very concise (max 10-15 words).
+    1. **Speed**: Keep descriptions very concise (max 15 words).
     2. **Booking Links**: Use real-looking URLs (e.g., https://www.google.com/travel/flights?q=...).
     3. **Currency**: INR (₹).
     4. **Safety**: Ensure JSON validity. Do not include markdown formatting like \`\`\`json.
@@ -151,7 +152,6 @@ export const generateTripPlan = async (prefs: UserPreferences): Promise<TripPlan
   `;
 
   const userPrompt = `Generate plan for ${prefs.searchType} trip to ${prefs.destination}.`;
-
   const parts: any[] = [{ text: userPrompt }];
 
   if (prefs.image) {
@@ -161,25 +161,25 @@ export const generateTripPlan = async (prefs: UserPreferences): Promise<TripPlan
   }
 
   try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: { parts },
-      config: {
-        systemInstruction: systemInstruction,
+    const model = ai.getGenerativeModel({ 
+      model: 'gemini-1.5-flash',
+      systemInstruction: systemInstruction,
+    });
+
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts }],
+      generationConfig: {
         responseMimeType: "application/json",
-        responseSchema: tripPlanSchema,
+        responseSchema: tripPlanSchema as any,
       },
     });
 
-    let responseText = response.text;
+    const response = await result.response;
+    let responseText = response.text();
     if (!responseText) throw new Error("AI returned empty response");
 
-    // Clean up markdown if present (Flash sometimes adds it despite config)
-    if (responseText.startsWith("```json")) {
-        responseText = responseText.replace(/^```json\n/, "").replace(/\n```$/, "");
-    } else if (responseText.startsWith("```")) {
-        responseText = responseText.replace(/^```\n/, "").replace(/\n```$/, "");
-    }
+    // Clean up markdown if present
+    responseText = responseText.replace(/```json/g, "").replace(/```/g, "").trim();
 
     const plan = JSON.parse(responseText) as TripPlan;
     
@@ -201,24 +201,6 @@ export const generateTripPlan = async (prefs: UserPreferences): Promise<TripPlan
 
   } catch (error) {
     console.error("Trip Generation Error:", error);
-    // Provide a fallback mock plan if AI fails completely, so user sees SOMETHING
-    if (process.env.NODE_ENV === 'development') {
-        console.warn("Returning fallback data due to error");
-        return {
-             id: "error-fallback",
-             createdAt: Date.now(),
-             summary: "We encountered a hiccup connecting to the AI, but here is a template for your trip to " + prefs.destination,
-             destinationInfo: "Beautiful destination",
-             suggestedFlights: [],
-             suggestedHotels: [],
-             transitOptions: [],
-             itinerary: [],
-             budget: { transport: 0, accommodation: 0, food: 0, activities: 0, miscellaneous: 0, total: 0, currency: "₹" },
-             safetyTips: ["Please try searching again in a moment."],
-             packingList: [],
-             alternatives: ""
-        };
-    }
     throw new Error("Failed to generate plan. Please try again.");
   }
 };

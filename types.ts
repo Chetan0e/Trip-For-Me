@@ -14,10 +14,10 @@ export interface UserPreferences {
 }
 
 export interface UserProfile {
+  uid: string;
   name: string;
   email: string;
-  phone: string;
-  isLoggedIn: boolean;
+  photoURL: string;
   trips: TripPlan[];
 }
 

@@ -1,7 +1,12 @@
 import React, { useState } from 'react';
 import { UserPreferences } from '../types';
 import CityAutocomplete from './CityAutocomplete';
-import { MapPin, Calendar, Users, Briefcase, Loader2, Search, Plane, Hotel, Train, Palmtree, Sparkles, Building2, Ticket, Bus, Car, Bike, Footprints } from 'lucide-react';
+import { 
+  MapPin, Calendar, Users, Briefcase, Loader2, Search, Plane, 
+  Hotel, Train, Palmtree, Sparkles, Building2, Ticket, Bus, 
+  Car, Bike, Footprints, Camera, Music, Coffee, Mountain, Compass
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface TripFormProps {
   onSubmit: (prefs: UserPreferences) => void;
@@ -9,8 +14,16 @@ interface TripFormProps {
 }
 
 const INTERESTS_LIST = [
-  "Nature", "History", "Food", "Adventure", "Relaxation", 
-  "Nightlife", "Shopping", "Culture", "Spiritual", "Luxury"
+  { id: "Nature", icon: <Mountain size={14} /> },
+  { id: "History", icon: <Building2 size={14} /> },
+  { id: "Food", icon: <Coffee size={14} /> },
+  { id: "Adventure", icon: <Compass size={14} /> },
+  { id: "Relaxation", icon: <Palmtree size={14} /> },
+  { id: "Nightlife", icon: <Music size={14} /> },
+  { id: "Culture", icon: <Sparkles size={14} /> },
+  { id: "Photography", icon: <Camera size={14} /> },
+  { id: "Luxury", icon: <Briefcase size={14} /> },
+  { id: "Shopping", icon: <Ticket size={14} /> }
 ];
 
 const TripForm: React.FC<TripFormProps> = ({ onSubmit, isLoading }) => {
@@ -55,379 +68,314 @@ const TripForm: React.FC<TripFormProps> = ({ onSubmit, isLoading }) => {
     onSubmit(finalData);
   };
 
-  // Helper to render distinct form sections
-  const renderFormContent = () => {
-    // Changed w-full to flex-1 min-w-0 to properly share space with icons
-    const commonInputClass = "flex-1 min-w-0 bg-transparent outline-none text-slate-800 font-bold placeholder-slate-400";
-    
+  const commonInputClass = "flex-1 min-w-0 bg-transparent outline-none text-slate-800 font-bold placeholder-slate-400";
+  
+  const renderTabContent = () => {
     switch (activeTab) {
-        case 'flight':
-            return (
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-                    <div className="md:col-span-5 grid grid-cols-2 gap-4">
-                         <div className="relative group">
-                            <label className="text-[10px] font-black text-slate-500 uppercase mb-1.5 block tracking-wider">From</label>
-                            <CityAutocomplete 
-                                name="origin" 
-                                value={formData.origin} 
-                                onChange={(val) => handleCityChange('origin', val)}
-                                placeholder="Delhi (DEL)"
-                                icon={<Plane className="text-blue-500 mr-3" size={20} />}
-                            />
-                         </div>
-                         <div className="relative group">
-                            <label className="text-[10px] font-black text-slate-500 uppercase mb-1.5 block tracking-wider">To</label>
-                            <CityAutocomplete 
-                                name="destination" 
-                                value={formData.destination} 
-                                onChange={(val) => handleCityChange('destination', val)}
-                                placeholder="Mumbai (BOM)"
-                                icon={<MapPin className="text-blue-500 mr-3" size={20} />}
-                            />
-                         </div>
-                    </div>
-                    <div className="md:col-span-4 grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="text-[10px] font-black text-slate-500 uppercase mb-1.5 block tracking-wider">Departure</label>
-                            <div className="input-group group focus-within:ring-2 ring-blue-400">
-                                <Calendar className="text-blue-500 mr-2 flex-shrink-0" size={18} />
-                                <input required type="date" name="startDate" value={formData.startDate} onChange={handleInputChange} className={`${commonInputClass} text-sm cursor-pointer`} />
-                            </div>
-                        </div>
-                        <div>
-                            <label className="text-[10px] font-black text-slate-500 uppercase mb-1.5 block tracking-wider">Return</label>
-                            <div className="input-group group focus-within:ring-2 ring-blue-400">
-                                <Calendar className="text-blue-500 mr-2 flex-shrink-0" size={18} />
-                                <input type="date" name="returnDate" value={formData.returnDate} onChange={handleInputChange} className={`${commonInputClass} text-sm cursor-pointer`} />
-                            </div>
-                        </div>
-                    </div>
-                    <div className="md:col-span-3">
-                         <label className="text-[10px] font-black text-slate-500 uppercase mb-1.5 block tracking-wider">Class</label>
-                         <div className="input-group">
-                             <Users className="text-blue-500 mr-3 flex-shrink-0" size={20} />
-                             <select name="budget" value={formData.budget} onChange={handleInputChange} className={`${commonInputClass} text-sm cursor-pointer`}>
-                                <option value="Budget">Economy</option>
-                                <option value="Moderate">Business</option>
-                                <option value="Luxury">First Class</option>
-                            </select>
-                         </div>
-                    </div>
+      case 'flight':
+        return (
+          <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="grid grid-cols-1 md:grid-cols-12 gap-4">
+            <div className="md:col-span-5 grid grid-cols-2 gap-4">
+              <div className="relative">
+                <label className="text-[10px] font-black text-slate-500 uppercase mb-2 block tracking-widest">From</label>
+                <CityAutocomplete name="origin" value={formData.origin} onChange={(val) => handleCityChange('origin', val)} placeholder="Departure City" icon={<Plane className="text-blue-500" size={18} />} />
+              </div>
+              <div className="relative">
+                <label className="text-[10px] font-black text-slate-500 uppercase mb-2 block tracking-widest">To</label>
+                <CityAutocomplete name="destination" value={formData.destination} onChange={(val) => handleCityChange('destination', val)} placeholder="Target City" icon={<MapPin className="text-rose-500" size={18} />} />
+              </div>
+            </div>
+            <div className="md:col-span-4 grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-[10px] font-black text-slate-500 uppercase mb-2 block tracking-widest">Departure</label>
+                <div className="input-group">
+                  <Calendar className="text-blue-500 mr-3" size={18} />
+                  <input required type="date" name="startDate" value={formData.startDate} onChange={handleInputChange} className={commonInputClass} />
                 </div>
-            );
-
-        case 'hotel':
-            return (
-                 <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-                    <div className="md:col-span-5">
-                         <div className="relative group">
-                            <label className="text-[10px] font-black text-slate-500 uppercase mb-1.5 block tracking-wider">Location / Property</label>
-                            <CityAutocomplete 
-                                name="destination" 
-                                value={formData.destination} 
-                                onChange={(val) => handleCityChange('destination', val)}
-                                placeholder="Goa, Jaipur..."
-                                icon={<Building2 className="text-blue-500 mr-3" size={20} />}
-                            />
-                         </div>
-                    </div>
-                    <div className="md:col-span-4 grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="text-[10px] font-black text-slate-500 uppercase mb-1.5 block tracking-wider">Check-in</label>
-                            <div className="input-group group focus-within:ring-2 ring-blue-400">
-                                <Calendar className="text-blue-500 mr-2 flex-shrink-0" size={18} />
-                                <input required type="date" name="startDate" value={formData.startDate} onChange={handleInputChange} className={`${commonInputClass} text-sm cursor-pointer`} />
-                            </div>
-                        </div>
-                        <div>
-                            <label className="text-[10px] font-black text-slate-500 uppercase mb-1.5 block tracking-wider">Nights</label>
-                            <div className="input-group">
-                                <input required type="number" name="duration" min="1" value={formData.duration} onChange={handleInputChange} className={`${commonInputClass} pl-2`} placeholder="2" />
-                            </div>
-                        </div>
-                    </div>
-                    <div className="md:col-span-3">
-                         <label className="text-[10px] font-black text-slate-500 uppercase mb-1.5 block tracking-wider">Guests</label>
-                         <div className="input-group">
-                             <Users className="text-blue-500 mr-3 flex-shrink-0" size={20} />
-                             <input type="number" name="travelers" min="1" value={formData.travelers} onChange={handleInputChange} className={commonInputClass} />
-                         </div>
-                    </div>
+              </div>
+              <div>
+                <label className="text-[10px] font-black text-slate-500 uppercase mb-2 block tracking-widest">Return</label>
+                <div className="input-group">
+                  <Calendar className="text-blue-500 mr-3" size={18} />
+                  <input type="date" name="returnDate" value={formData.returnDate} onChange={handleInputChange} className={commonInputClass} />
                 </div>
-            );
+              </div>
+            </div>
+            <div className="md:col-span-3">
+              <label className="text-[10px] font-black text-slate-500 uppercase mb-2 block tracking-widest">Cabin Class</label>
+              <div className="input-group">
+                <Users className="text-blue-500 mr-3" size={18} />
+                <select name="budget" value={formData.budget} onChange={handleInputChange} className={commonInputClass}>
+                  <option value="Budget">Economy</option>
+                  <option value="Moderate">Business</option>
+                  <option value="Luxury">First Class</option>
+                </select>
+              </div>
+            </div>
+          </motion.div>
+        );
 
-        case 'train':
-            return (
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-                    <div className="md:col-span-6 grid grid-cols-2 gap-4">
-                         <div className="relative group">
-                            <label className="text-[10px] font-black text-slate-500 uppercase mb-1.5 block tracking-wider">From Station</label>
-                            <CityAutocomplete 
-                                name="origin" 
-                                value={formData.origin} 
-                                onChange={(val) => handleCityChange('origin', val)}
-                                placeholder="New Delhi"
-                                icon={<Train className="text-blue-500 mr-3" size={20} />}
-                            />
-                         </div>
-                         <div className="relative group">
-                            <label className="text-[10px] font-black text-slate-500 uppercase mb-1.5 block tracking-wider">To Station</label>
-                            <CityAutocomplete 
-                                name="destination" 
-                                value={formData.destination} 
-                                onChange={(val) => handleCityChange('destination', val)}
-                                placeholder="Varanasi"
-                                icon={<MapPin className="text-blue-500 mr-3" size={20} />}
-                            />
-                         </div>
-                    </div>
-                    <div className="md:col-span-3">
-                        <label className="text-[10px] font-black text-slate-500 uppercase mb-1.5 block tracking-wider">Date</label>
-                        <div className="input-group group focus-within:ring-2 ring-blue-400">
-                            <Calendar className="text-blue-500 mr-3 flex-shrink-0" size={20} />
-                            <input required type="date" name="startDate" value={formData.startDate} onChange={handleInputChange} className={`${commonInputClass} text-sm cursor-pointer`} />
-                        </div>
-                    </div>
-                    <div className="md:col-span-3">
-                         <label className="text-[10px] font-black text-slate-500 uppercase mb-1.5 block tracking-wider">Class</label>
-                         <div className="input-group">
-                             <Ticket className="text-blue-500 mr-3 flex-shrink-0" size={20} />
-                             <select name="budget" value={formData.budget} onChange={handleInputChange} className={`${commonInputClass} text-sm`}>
-                                <option value="Budget">Sleeper (SL)</option>
-                                <option value="Moderate">3 AC / 2 AC</option>
-                                <option value="Luxury">1st Class AC</option>
-                            </select>
-                         </div>
-                    </div>
+      case 'hotel':
+        return (
+          <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="grid grid-cols-1 md:grid-cols-12 gap-4">
+            <div className="md:col-span-5">
+              <label className="text-[10px] font-black text-slate-500 uppercase mb-2 block tracking-widest">Location</label>
+              <CityAutocomplete name="destination" value={formData.destination} onChange={(val) => handleCityChange('destination', val)} placeholder="Where are you staying?" icon={<Building2 className="text-indigo-500" size={18} />} />
+            </div>
+            <div className="md:col-span-4 grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-[10px] font-black text-slate-500 uppercase mb-2 block tracking-widest">Check-in</label>
+                <div className="input-group">
+                  <Calendar className="text-blue-500 mr-3" size={18} />
+                  <input required type="date" name="startDate" value={formData.startDate} onChange={handleInputChange} className={commonInputClass} />
                 </div>
-            );
-
-        case 'trip': 
-        case 'package':
-        default:
-             return (
-                <div className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-                        <div className="md:col-span-5 grid grid-cols-1 sm:grid-cols-2 gap-4 relative">
-                            <div className="relative group">
-                                <label className="text-[10px] font-black text-slate-500 uppercase mb-1.5 block tracking-wider">From</label>
-                                <CityAutocomplete 
-                                    name="origin" 
-                                    value={formData.origin} 
-                                    onChange={(val) => handleCityChange('origin', val)}
-                                    placeholder="Your City"
-                                    icon={<MapPin className="text-blue-500 mr-3" size={20} />}
-                                />
-                            </div>
-                            <div className="relative group">
-                                <label className="text-[10px] font-black text-slate-500 uppercase mb-1.5 block tracking-wider">To</label>
-                                <CityAutocomplete 
-                                    name="destination" 
-                                    value={formData.destination} 
-                                    onChange={(val) => handleCityChange('destination', val)}
-                                    placeholder="Dream Destination"
-                                    icon={<MapPin className="text-blue-500 mr-3" size={20} />}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="md:col-span-3">
-                            <label className="text-[10px] font-black text-slate-500 uppercase mb-1.5 block tracking-wider">Date & Duration</label>
-                            <div className="input-group group focus-within:ring-2 ring-blue-400">
-                                <Calendar className="text-blue-500 mr-3 flex-shrink-0" size={20} />
-                                <input required type="date" name="startDate" value={formData.startDate} onChange={handleInputChange} className={`${commonInputClass} text-sm cursor-pointer`} />
-                                <div className="w-px h-6 bg-slate-300 mx-2"></div>
-                                <input required type="number" min="1" max="30" name="duration" value={formData.duration} onChange={handleInputChange} placeholder="#" className="bg-transparent outline-none text-slate-800 font-bold w-12 text-center" />
-                            </div>
-                        </div>
-
-                        <div className="md:col-span-4">
-                            <label className="text-[10px] font-black text-slate-500 uppercase mb-1.5 block tracking-wider">Travelers & Budget</label>
-                            <div className="input-group">
-                                <Users className="text-blue-500 mr-3 flex-shrink-0" size={20} />
-                                <input required type="number" min="1" name="travelers" value={formData.travelers} onChange={handleInputChange} className="bg-transparent outline-none text-slate-800 font-bold w-12 mr-2" />
-                                <div className="w-px h-6 bg-slate-300 mx-2"></div>
-                                <Briefcase className="text-blue-500 mr-3 flex-shrink-0" size={20} />
-                                <select name="budget" value={formData.budget} onChange={handleInputChange} className={`${commonInputClass} text-sm cursor-pointer`}>
-                                    <option value="Budget">Economy</option>
-                                    <option value="Moderate">Standard</option>
-                                    <option value="Luxury">Luxury</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    {/* Glassy Transport Mode Selector */}
-                    <div className="py-2">
-                        <label className="text-[10px] font-black text-slate-500 uppercase mb-2 block tracking-wider">Preferred Mode of Travel</label>
-                        <div className="flex gap-2 flex-wrap">
-                            {[
-                                { id: 'any', label: 'Best Route', icon: <Sparkles size={14} /> },
-                                { id: 'flight', label: 'Flight', icon: <Plane size={14} /> },
-                                { id: 'train', label: 'Train', icon: <Train size={14} /> },
-                                { id: 'bus', label: 'Bus', icon: <Bus size={14} /> },
-                                { id: 'car', label: 'Car', icon: <Car size={14} /> },
-                                { id: 'bike', label: 'Bike', icon: <Bike size={14} /> },
-                                { id: 'walk', label: 'Walk', icon: <Footprints size={14} /> },
-                            ].map(mode => (
-                                <button
-                                    key={mode.id}
-                                    type="button"
-                                    onClick={() => setFormData(prev => ({ ...prev, transportMode: mode.id as any }))}
-                                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition border backdrop-blur-sm ${
-                                        formData.transportMode === mode.id
-                                        ? 'bg-blue-600 text-white border-blue-500 shadow-lg transform scale-105'
-                                        : 'bg-white/50 text-slate-600 border-white/40 hover:bg-white/80 hover:border-white'
-                                    }`}
-                                >
-                                    {mode.icon} {mode.label}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
+              </div>
+              <div>
+                <label className="text-[10px] font-black text-slate-500 uppercase mb-2 block tracking-widest">Guests</label>
+                <div className="input-group">
+                  <Users className="text-blue-500 mr-3" size={18} />
+                  <input type="number" name="travelers" min="1" value={formData.travelers} onChange={handleInputChange} className={commonInputClass} />
                 </div>
-             );
+              </div>
+            </div>
+            <div className="md:col-span-3">
+              <label className="text-[10px] font-black text-slate-500 uppercase mb-2 block tracking-widest">Hotel Star</label>
+              <div className="input-group">
+                <Sparkles className="text-amber-500 mr-3" size={18} />
+                <select name="budget" value={formData.budget} onChange={handleInputChange} className={commonInputClass}>
+                  <option value="Budget">3 Star (Budget)</option>
+                  <option value="Moderate">4 Star (Moderate)</option>
+                  <option value="Luxury">5 Star (Luxury)</option>
+                </select>
+              </div>
+            </div>
+          </motion.div>
+        );
+
+      case 'train':
+        return (
+          <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="grid grid-cols-1 md:grid-cols-12 gap-4">
+            <div className="md:col-span-6 grid grid-cols-2 gap-4">
+              <div className="relative">
+                <label className="text-[10px] font-black text-slate-500 uppercase mb-2 block tracking-widest">Origin</label>
+                <CityAutocomplete name="origin" value={formData.origin} onChange={(val) => handleCityChange('origin', val)} placeholder="From Station" icon={<Train className="text-blue-600" size={18} />} />
+              </div>
+              <div className="relative">
+                <label className="text-[10px] font-black text-slate-500 uppercase mb-2 block tracking-widest">Destination</label>
+                <CityAutocomplete name="destination" value={formData.destination} onChange={(val) => handleCityChange('destination', val)} placeholder="To Station" icon={<MapPin className="text-emerald-500" size={18} />} />
+              </div>
+            </div>
+            <div className="md:col-span-3">
+              <label className="text-[10px] font-black text-slate-500 uppercase mb-2 block tracking-widest">Date</label>
+              <div className="input-group">
+                <Calendar className="text-blue-500 mr-3" size={18} />
+                <input required type="date" name="startDate" value={formData.startDate} onChange={handleInputChange} className={commonInputClass} />
+              </div>
+            </div>
+            <div className="md:col-span-3">
+              <label className="text-[10px] font-black text-slate-500 uppercase mb-2 block tracking-widest">Ticket Class</label>
+              <div className="input-group">
+                <Ticket className="text-blue-500 mr-3" size={18} />
+                <select name="budget" value={formData.budget} onChange={handleInputChange} className={commonInputClass}>
+                  <option value="Budget">Sleeper / General</option>
+                  <option value="Moderate">AC Chair / 3rd AC</option>
+                  <option value="Luxury">2nd AC / 1st AC</option>
+                </select>
+              </div>
+            </div>
+          </motion.div>
+        );
+
+      case 'trip':
+      case 'package':
+      default:
+        return (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+              <div className="md:col-span-12 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="relative">
+                  <label className="text-[10px] font-black text-slate-500 uppercase mb-2 block tracking-widest">Origin</label>
+                  <CityAutocomplete name="origin" value={formData.origin} onChange={(val) => handleCityChange('origin', val)} placeholder="Current Location" icon={<MapPin className="text-blue-500" size={18} />} />
+                </div>
+                <div className="relative">
+                  <label className="text-[10px] font-black text-slate-500 uppercase mb-2 block tracking-widest">Destination</label>
+                  <CityAutocomplete name="destination" value={formData.destination} onChange={(val) => handleCityChange('destination', val)} placeholder="Where to go?" icon={<Sparkles className="text-amber-500" size={18} />} />
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+              <div className="md:col-span-4">
+                <label className="text-[10px] font-black text-slate-500 uppercase mb-2 block tracking-widest">Departure & Days</label>
+                <div className="input-group">
+                  <Calendar className="text-blue-500 mr-3" size={18} />
+                  <input required type="date" name="startDate" value={formData.startDate} onChange={handleInputChange} className={commonInputClass} />
+                  <div className="w-px h-6 bg-slate-200 mx-3"></div>
+                  <input required type="number" min="1" max="30" name="duration" value={formData.duration} onChange={handleInputChange} className="w-10 bg-transparent font-black text-slate-800 outline-none text-center" />
+                  <span className="text-[10px] font-bold text-slate-400 ml-1">DAYS</span>
+                </div>
+              </div>
+
+              <div className="md:col-span-4">
+                <label className="text-[10px] font-black text-slate-500 uppercase mb-2 block tracking-widest">Travelers</label>
+                <div className="input-group">
+                  <Users className="text-blue-500 mr-3" size={18} />
+                  <input required type="number" min="1" name="travelers" value={formData.travelers} onChange={handleInputChange} className={commonInputClass} />
+                  <span className="text-[10px] font-bold text-slate-400">PEOPLE</span>
+                </div>
+              </div>
+
+              <div className="md:col-span-4">
+                <label className="text-[10px] font-black text-slate-500 uppercase mb-2 block tracking-widest">Budget Level</label>
+                <div className="input-group">
+                  <Briefcase className="text-blue-500 mr-3" size={18} />
+                  <select name="budget" value={formData.budget} onChange={handleInputChange} className={commonInputClass}>
+                    <option value="Budget">Economy (₹)</option>
+                    <option value="Moderate">Comfort (₹₹)</option>
+                    <option value="Luxury">Premium (₹₹₹)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-2">
+              <label className="text-[10px] font-black text-slate-500 uppercase mb-3 block tracking-widest">Preferred Transport</label>
+              <div className="flex gap-2 flex-wrap">
+                {[
+                  { id: 'any', label: 'AI Choice', icon: <Sparkles size={14} /> },
+                  { id: 'flight', label: 'Fastest', icon: <Plane size={14} /> },
+                  { id: 'train', label: 'Scenic', icon: <Train size={14} /> },
+                  { id: 'car', label: 'Road Trip', icon: <Car size={14} /> },
+                  { id: 'bus', label: 'Bus', icon: <Bus size={14} /> },
+                ].map(mode => (
+                  <button
+                    key={mode.id}
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, transportMode: mode.id as any }))}
+                    className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border ${
+                      formData.transportMode === mode.id
+                      ? 'bg-blue-600 text-white border-blue-500 shadow-lg'
+                      : 'bg-white text-slate-600 border-slate-100 hover:border-blue-200'
+                    }`}
+                  >
+                    {mode.icon} {mode.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        );
     }
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto space-y-8 animate-fade-in-up">
+    <div className="w-full max-w-5xl mx-auto space-y-12 py-10">
       <style>{`
         .input-group {
-            display: flex;
-            align-items: center;
-            border: 1px solid rgba(255,255,255,0.6);
-            border-radius: 1rem;
-            background-color: rgba(255,255,255,0.7);
-            padding: 0.75rem 1rem;
-            transition: all 0.3s;
-            backdrop-filter: blur(8px);
+          display: flex;
+          align-items: center;
+          background: #ffffff;
+          border: 1px solid #f1f5f9;
+          border-radius: 1.25rem;
+          padding: 0.875rem 1.25rem;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .input-group:focus-within {
-            border-color: #3b82f6;
-            background-color: rgba(255,255,255,0.95);
-            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.15);
-            transform: translateY(-1px);
+          border-color: #3b82f6;
+          box-shadow: 0 10px 30px -10px rgba(59, 130, 246, 0.2);
+          transform: translateY(-2px);
         }
-        
-        /* STRICTLY FIX CALENDAR PICKER VISIBILITY */
-        input[type="date"] {
-            cursor: pointer;
-            color-scheme: light; /* Forces dark/standard controls regardless of system theme */
-        }
-        input[type="date"]::-webkit-calendar-picker-indicator {
-            cursor: pointer;
-            /* Filter to make the icon blue (#3b82f6) */
-            filter: invert(43%) sepia(93%) saturate(1394%) hue-rotate(202deg) brightness(98%) contrast(96%);
-            opacity: 1; 
-            width: 24px;
-            height: 24px;
-            margin-left: 10px;
-            transition: transform 0.2s;
-        }
-        input[type="date"]::-webkit-calendar-picker-indicator:hover {
-            transform: scale(1.2);
-            background-color: rgba(59, 130, 246, 0.1);
-            border-radius: 50%;
-        }
-        
-        /* Custom scrollbar for dropdown */
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: rgba(0,0,0,0.05);
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(0,0,0,0.1);
-          border-radius: 10px;
-        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
       `}</style>
       
-      <div className="text-center space-y-4 mb-10">
-        <h1 className="text-5xl md:text-7xl font-black text-white tracking-tight drop-shadow-lg font-display">
-            Explore the <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-400">Unseen</span>
-        </h1>
-        <p className="text-xl text-white/90 font-medium max-w-2xl mx-auto drop-shadow-md">
-            Next-gen AI travel engine. Lightning fast & personalized.
-        </p>
+      <div className="text-center space-y-4">
+        <motion.h1 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-6xl md:text-8xl font-black text-white tracking-tighter font-display drop-shadow-2xl"
+        >
+          Journey <span className="text-blue-400">Beyond</span>.
+        </motion.h1>
+        <motion.p 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="text-xl text-blue-100 font-medium max-w-xl mx-auto opacity-80"
+        >
+          Supercharged with Gemini AI for the ultimate travel experience.
+        </motion.p>
       </div>
 
-      <div className="glass-panel rounded-3xl p-8 shadow-2xl">
-        
-        {/* Service Type Tabs */}
-        <div className="flex gap-4 border-b border-gray-200/50 pb-6 mb-6 overflow-x-auto no-scrollbar">
-            {[
-                { id: 'trip', icon: <Sparkles size={18} />, label: 'AI Planner' },
-                { id: 'flight', icon: <Plane size={18} />, label: 'Flights' },
-                { id: 'hotel', icon: <Hotel size={18} />, label: 'Hotels' },
-                { id: 'train', icon: <Train size={18} />, label: 'Train/Bus' },
-                { id: 'package', icon: <Palmtree size={18} />, label: 'Holidays' },
-            ].map(tab => (
-                <button
-                    key={tab.id}
-                    onClick={() => { setActiveTab(tab.id as any); setFormData(prev => ({...prev, transportMode: 'any'})); }}
-                    className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold transition whitespace-nowrap ${
-                        activeTab === tab.id 
-                        ? 'bg-slate-900 text-white shadow-lg' 
-                        : 'bg-white/40 text-slate-700 hover:bg-white/70'
-                    }`}
-                >
-                    {tab.icon} {tab.label}
-                </button>
-            ))}
+      <div className="bg-white/95 backdrop-blur-3xl rounded-[40px] p-10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] border border-white/20">
+        <div className="flex gap-4 border-b border-slate-100 pb-8 mb-8 overflow-x-auto no-scrollbar">
+          {[
+            { id: 'trip', icon: <Sparkles size={18} />, label: 'AI Planner' },
+            { id: 'flight', icon: <Plane size={18} />, label: 'Flights' },
+            { id: 'hotel', icon: <Hotel size={18} />, label: 'Hotels' },
+            { id: 'train', icon: <Train size={18} />, label: 'Rail/Road' },
+            { id: 'package', icon: <Palmtree size={18} />, label: 'Explore' },
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => { setActiveTab(tab.id as any); setFormData(prev => ({ ...prev, transportMode: 'any' })); }}
+              className={`flex items-center gap-3 px-6 py-3 rounded-2xl text-sm font-black transition-all ${
+                activeTab === tab.id 
+                ? 'bg-slate-950 text-white shadow-xl scale-105' 
+                : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
+              }`}
+            >
+              {tab.icon} {tab.label}
+            </button>
+          ))}
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-            
-            {renderFormContent()}
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <AnimatePresence mode="wait">
+            {renderTabContent()}
+          </AnimatePresence>
 
-            {/* Filters */}
-            {(activeTab === 'trip' || activeTab === 'package') && (
-                <div className="flex flex-wrap gap-3 items-center pt-4 border-t border-gray-200/50 mt-2">
-                    <span className="text-xs font-black text-slate-400 uppercase tracking-widest mt-2">Vibe</span>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                        {INTERESTS_LIST.slice(0, 6).map(interest => (
-                            <button
-                                key={interest}
-                                type="button"
-                                onClick={() => handleInterestToggle(interest)}
-                                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition border ${
-                                    formData.interests.includes(interest)
-                                    ? 'bg-blue-100 border-blue-300 text-blue-700'
-                                    : 'bg-white/40 border-transparent text-slate-600 hover:bg-white/80'
-                                }`}
-                            >
-                                {interest}
-                            </button>
-                        ))}
-                    </div>
-                </div>
+          {(activeTab === 'trip' || activeTab === 'package') && (
+            <div className="space-y-4 pt-6 border-t border-slate-100">
+              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">Travel Interests</label>
+              <div className="flex flex-wrap gap-2">
+                {INTERESTS_LIST.map(interest => (
+                  <button
+                    key={interest.id}
+                    type="button"
+                    onClick={() => handleInterestToggle(interest.id)}
+                    className={`flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold transition-all border ${
+                      formData.interests.includes(interest.id)
+                      ? 'bg-blue-50 border-blue-200 text-blue-600 shadow-sm'
+                      : 'bg-white border-slate-100 text-slate-500 hover:border-slate-200'
+                    }`}
+                  >
+                    {interest.icon} {interest.id}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full py-5 bg-blue-600 hover:bg-blue-700 text-white font-black text-xl rounded-3xl shadow-2xl hover:shadow-blue-500/40 transition-all duration-300 flex items-center justify-center gap-4 group disabled:opacity-50"
+          >
+            {isLoading ? (
+              <Loader2 className="animate-spin" size={24} />
+            ) : (
+              <>
+                GENERATE MY {activeTab.toUpperCase()} <Search size={24} className="group-hover:translate-x-1 transition" />
+              </>
             )}
-
-            <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full py-4 mt-4 bg-slate-900 hover:bg-black text-white font-black text-lg rounded-2xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed active:scale-[0.98]"
-            >
-                {isLoading ? (
-                    <>
-                    <Loader2 className="animate-spin" /> Analyzing Routes...
-                    </>
-                ) : (
-                    <>
-                    SEARCH {activeTab.toUpperCase()} <Search size={22} className="text-blue-400" />
-                    </>
-                )}
-            </button>
+          </button>
         </form>
       </div>
-      
-      {/* Trust Badges */}
-      <div className="flex justify-center gap-8 text-white/70 text-sm font-bold drop-shadow-sm">
-           <span className="flex items-center gap-2"><Plane size={16} className="text-blue-300" /> 400+ Airlines</span>
-           <span className="flex items-center gap-2"><Hotel size={16} className="text-blue-300" /> 2M+ Hotels</span>
-           <span className="flex items-center gap-2"><Sparkles size={16} className="text-blue-300" /> Gemini Flash AI</span>
+
+      <div className="flex flex-wrap justify-center gap-10 text-white/40 text-xs font-black uppercase tracking-[0.2em]">
+        <span className="flex items-center gap-2"><Plane size={14} /> 500+ Ecosystem Partners</span>
+        <span className="flex items-center gap-2"><Briefcase size={14} /> Smart Budgeting</span>
+        <span className="flex items-center gap-2"><Sparkles size={14} /> Gemini Flash Engine</span>
       </div>
     </div>
   );
