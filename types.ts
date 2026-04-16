@@ -98,6 +98,7 @@ export interface TripPlan {
 }
 
 export enum ViewState {
+  LANDING,
   FORM,
   LOADING,
   RESULT,

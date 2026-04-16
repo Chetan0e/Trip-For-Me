@@ -23,7 +23,7 @@ import { AlertCircle, User, X, Plane, LogOut, Heart, Map, Menu, Loader2, Luggage
 import { motion, AnimatePresence } from 'framer-motion';
 
 function App() {
-  const [viewState, setViewState] = useState<ViewState>(ViewState.FORM);
+  const [viewState, setViewState] = useState<ViewState>(ViewState.LANDING);
   const [tripPlan, setTripPlan] = useState<TripPlan | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -32,6 +32,11 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!auth) {
+      setLoading(false);
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         // Fetch user trips from Firestore
@@ -68,10 +73,16 @@ function App() {
   }, []);
 
   const handleGoogleLogin = async () => {
+    if (!auth || !googleProvider) {
+      alert('Firebase is not configured. Please add your Firebase credentials to the .env file.');
+      setIsLoginOpen(false);
+      return;
+    }
     setIsLoggingIn(true);
     try {
       await signInWithPopup(auth, googleProvider);
       setIsLoginOpen(false);
+      setViewState(ViewState.FORM);
     } catch (error) {
       console.error("Login failed", error);
     } finally {
@@ -80,15 +91,21 @@ function App() {
   };
 
   const handleLogout = async () => {
+    if (!auth) return;
     try {
       await signOut(auth);
-      setViewState(ViewState.FORM);
+      setViewState(ViewState.LANDING);
     } catch (error) {
       console.error("Logout failed", error);
     }
   };
 
   const handleSaveTrip = async () => {
+    if (!db) {
+      alert('Firebase is not configured. Please add your Firebase credentials to the .env file.');
+      setIsLoginOpen(true);
+      return;
+    }
     if (!userProfile) {
       setIsLoginOpen(true);
       return;
@@ -126,7 +143,7 @@ function App() {
 
   const handleReset = () => {
     setTripPlan(null);
-    setViewState(ViewState.FORM);
+    setViewState(ViewState.LANDING);
     setErrorMsg(null);
   };
 
@@ -234,8 +251,6 @@ function App() {
           </div>
 
           <div className="flex items-center gap-6">
-            <button onClick={handleReset} className="hidden md:block text-white/70 hover:text-white transition font-bold text-xs uppercase tracking-widest">Plan Trip</button>
-            
             {userProfile ? (
               <button 
                 onClick={() => setViewState(ViewState.PROFILE)}
@@ -262,6 +277,123 @@ function App() {
 
       <main className="container mx-auto px-4 py-8 flex flex-col items-center justify-start flex-grow z-10">
         <AnimatePresence mode="wait">
+          {viewState === ViewState.LANDING && (
+            <motion.div 
+              key="landing"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="w-full min-h-[80vh] flex items-center"
+            >
+              <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                {/* Left side - Website Details */}
+                <motion.div 
+                  initial={{ opacity: 0, x: -50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="text-white space-y-8"
+                >
+                  <div className="space-y-4">
+                    <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur-lg px-6 py-3 rounded-full border border-white/20">
+                      <Luggage className="text-blue-400" size={24} />
+                      <span className="font-bold text-sm uppercase tracking-widest">AI-Powered Travel</span>
+                    </div>
+                    <h1 className="text-6xl md:text-7xl font-black font-display leading-tight">
+                      Plan Your <br />
+                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Dream Trip</span>
+                    </h1>
+                    <p className="text-xl text-white/80 leading-relaxed max-w-lg">
+                      Let our AI craft personalized itineraries, find the best deals, and create unforgettable travel experiences tailored just for you.
+                    </p>
+                  </div>
+                  
+                  <div className="grid grid-cols-3 gap-6 pt-8">
+                    <div className="text-center">
+                      <div className="text-4xl font-black font-display text-blue-400">50K+</div>
+                      <div className="text-white/60 text-sm font-bold uppercase tracking-wider mt-2">Travelers</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-4xl font-black font-display text-indigo-400">100+</div>
+                      <div className="text-white/60 text-sm font-bold uppercase tracking-wider mt-2">Countries</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-4xl font-black font-display text-purple-400">24/7</div>
+                      <div className="text-white/60 text-sm font-bold uppercase tracking-wider mt-2">Support</div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4 pt-8">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
+                        <Plane className="text-blue-400" size={20} />
+                      </div>
+                      <span className="text-white/90 font-medium">Smart itinerary planning</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center">
+                        <Heart className="text-indigo-400" size={20} />
+                      </div>
+                      <span className="text-white/90 font-medium">Budget optimization</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center">
+                        <Map className="text-purple-400" size={20} />
+                      </div>
+                      <span className="text-white/90 font-medium">Local recommendations</span>
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* Right side - Login/Register Box */}
+                <motion.div 
+                  initial={{ opacity: 0, x: 50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.4 }}
+                  className="flex justify-center lg:justify-end"
+                >
+                  <div className="bg-white rounded-[40px] p-10 w-full max-w-md shadow-2xl overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500" />
+                    
+                    <div className="text-center mb-10">
+                      <div className="inline-block p-4 bg-blue-50 rounded-3xl mb-4">
+                        <User className="text-blue-600" size={32} />
+                      </div>
+                      <h2 className="text-3xl font-black font-display text-slate-900 mb-2 tracking-tight">Get Started</h2>
+                      <p className="text-slate-500 font-medium">Join 50,000+ travelers planning with AI</p>
+                    </div>
+
+                    <div className="space-y-6">
+                      <button 
+                        onClick={handleGoogleLogin}
+                        disabled={isLoggingIn}
+                        className="w-full bg-white border-2 border-slate-100 text-slate-700 font-black py-4 rounded-2xl transition-all shadow-sm hover:shadow-xl hover:border-blue-100 flex items-center justify-center gap-4 group"
+                      >
+                        {isLoggingIn ? <Loader2 className="animate-spin text-blue-600" /> : (
+                          <>
+                            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-6 h-6 group-hover:scale-110 transition" />
+                            Continue with Google
+                          </>
+                        )}
+                      </button>
+
+                      <div className="relative flex items-center py-2">
+                        <div className="flex-grow border-t border-slate-100"></div>
+                        <span className="flex-shrink-0 mx-6 text-slate-300 text-[10px] font-black uppercase tracking-[0.3em]">Secure Gateway</span>
+                        <div className="flex-grow border-t border-slate-100"></div>
+                      </div>
+
+                      <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
+                        <p className="text-slate-400 text-[11px] leading-relaxed font-bold uppercase tracking-wider text-center">
+                          By continuing, you agree to our <span className="text-blue-600 cursor-pointer">Terms of Service</span> and <span className="text-blue-600 cursor-pointer">Privacy Policy</span>.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+            </motion.div>
+          )}
+
           {viewState === ViewState.FORM && (
             <motion.div 
               key="form"

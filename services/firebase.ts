@@ -12,8 +12,30 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-export const storage = getStorage(app);
-export const googleProvider = new GoogleAuthProvider();
+let app, auth, db, storage, googleProvider;
+
+try {
+  if (firebaseConfig.apiKey && firebaseConfig.apiKey !== 'your_firebase_api_key') {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+    storage = getStorage(app);
+    googleProvider = new GoogleAuthProvider();
+  } else {
+    console.warn('Firebase not configured. Running in demo mode.');
+    app = null;
+    auth = null;
+    db = null;
+    storage = null;
+    googleProvider = null;
+  }
+} catch (error) {
+  console.error('Firebase initialization failed:', error);
+  app = null;
+  auth = null;
+  db = null;
+  storage = null;
+  googleProvider = null;
+}
+
+export { auth, db, storage, googleProvider };
